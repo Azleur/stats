@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    // "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "moduleResolution": "node",
     "declaration": true
-  }
+  },
+  "exclude": ["**/*.test.ts"]
 }
