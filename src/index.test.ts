@@ -1,4 +1,4 @@
-import { Stats, observe, validate } from './Statistics';
+import { Stats, observe, validate } from './index';
 
 test("observe() returns sensible results", () => {
     const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
