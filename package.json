@@ -1,0 +1,19 @@
+{
+    "private": true,
+    "name": "statistics",
+    "version": "0.1.0",
+    "author": "Azleur",
+    "scripts": {
+        "test": "jest",
+        "test:run": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --collectCoverage",
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.18",
+        "jest": "^24.9.0",
+        "ts-jest": "^24.1.0",
+        "typescript": "^3.6.3"
+    }
+}
