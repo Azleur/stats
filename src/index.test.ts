@@ -1,6 +1,6 @@
-import { Stats, observe, validate } from './index';
+import { Stats, observe, getIngestor, validate, nullStats } from './index';
 
-test("observe() returns sensible results", () => {
+test("observe() Stats of a source of numbers by calling it a fixed number of times", () => {
     const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const ones = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     const half = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
@@ -14,6 +14,46 @@ test("observe() returns sensible results", () => {
         })(),
         values.length
     );
+
+    const zeroStats = helper(zeros);
+    expect(zeroStats.min).toBe(0);
+    expect(zeroStats.max).toBe(0);
+    expect(zeroStats.mean).toBe(0);
+    expect(zeroStats.variance).toBe(0);
+
+    const oneStats = helper(ones);
+    expect(oneStats.min).toBe(1);
+    expect(oneStats.max).toBe(1);
+    expect(oneStats.mean).toBe(1);
+    expect(oneStats.variance).toBe(0);
+
+    const halfStats = helper(half);
+    expect(halfStats.min).toBe(0);
+    expect(halfStats.max).toBe(1);
+    expect(halfStats.mean).toBe(0.5);
+    expect(halfStats.variance).toBe(0.25);
+
+    const numberStats = helper(numbers);
+    expect(numberStats.min).toBe(0);
+    expect(numberStats.max).toBe(9);
+    expect(numberStats.mean).toBe(4.5);
+});
+
+test("ingestor() calculates Stats of a source of numbers by being fed the values", () => {
+    const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const ones = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    const half = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
+    const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    // Anonymous lambda serves array. Helper returns observe() applied to that.
+    const helper = (values: Array<number>): Stats => {
+        const ingestor = getIngestor();
+        let stats: Stats = nullStats();
+        for (let entry of values) {
+            stats = ingestor(entry);
+        }
+        return stats;
+    }
 
     const zeroStats = helper(zeros);
     expect(zeroStats.min).toBe(0);
