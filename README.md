@@ -1,3 +1,47 @@
 # Statistics library
 
-This module provides a single TypeScript module, `Statistics.ts`, with methods for calculating common statistical properties of a sample set.
+Statistics library written in TypeScript.
+
+This module offers a set of utilities to calculate the min, max, mean and variance of a sample set in a single pass, with `O(1)` memory complexity, thanks to [Welford's algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm).
+
+## Batch processing
+
+`Observe()` allows easy sampling from a generator function. The results can be checked against an absolute tolerance threshold with `Validate()`.
+
+```typescript
+const stats: Stats = Observe(Math.random, 10000);
+/* Example run:
+stats == {
+    mean: 0.5043444454272914,
+    variance: 0.08365224363741369,
+    min: 0.00006183111645019501,
+    max: 0.9999845572175807,
+}; */
+
+const validation = {
+    tolerance: 0.01,
+    min: 0,
+    max: 1,
+    mean: 0.5,
+    variance: 1 / 12,
+};
+
+const good = Validate(stats, validation); // good == true (all values within tolerance).
+```
+
+## Yielding
+
+`GetIngestor()` can be fed one piece at a time. It returns `Stats` objects at every step, just like `Observe()`.
+
+If you need a dummy `Stats` object, you can use `NullStats()`.
+
+```typescript
+const ingestor = GetIngestor();
+const someData = [...];
+let stats = NullStats();
+for(datum of someData) {
+    // Slowly building up:
+    stats = ingestor(datum);
+}
+const good = Validate(stats, {...});
+```

@@ -1,4 +1,18 @@
-import { Stats, Observe, GetIngestor, Validate, NullStats } from './index';
+import { Stats, Validation, Observe, GetIngestor, Validate, NullStats } from './index';
+
+test("Hi, I'm an example", () => {
+    const stats = Observe(Math.random, 10000);
+    console.log(stats);
+    const validation: Validation = {
+        tolerance: 0.01,
+        min: 0,
+        max: 1,
+        mean: 0.5,
+        variance: 1 / 12,
+    };
+
+    expect(Validate(stats, validation)).toBe(true);
+});
 
 test("Observe() Stats of a source of numbers by calling it a fixed number of times", () => {
     const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
