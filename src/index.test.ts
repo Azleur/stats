@@ -1,13 +1,13 @@
-import { Stats, observe, getIngestor, validate, nullStats } from './index';
+import { Stats, Observe, GetIngestor, Validate, NullStats } from './index';
 
-test("observe() Stats of a source of numbers by calling it a fixed number of times", () => {
+test("Observe() Stats of a source of numbers by calling it a fixed number of times", () => {
     const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const ones = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     const half = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
     const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    // Anonymous lambda serves array. Helper returns observe() applied to that.
-    const helper = (values: Array<number>): Stats => observe(
+    // Anonymous lambda serves array. Helper returns Observe() applied to that.
+    const helper = (values: Array<number>): Stats => Observe(
         (() => {
             let i = 0;
             return () => values[i++];
@@ -45,10 +45,10 @@ test("ingestor() calculates Stats of a source of numbers by being fed the values
     const half = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1];
     const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    // Anonymous lambda serves array. Helper returns observe() applied to that.
+    // Anonymous lambda serves array. Helper returns Observe() applied to that.
     const helper = (values: Array<number>): Stats => {
-        const ingestor = getIngestor();
-        let stats: Stats = nullStats();
+        const ingestor = GetIngestor();
+        let stats: Stats = NullStats();
         for (let entry of values) {
             stats = ingestor(entry);
         }
@@ -79,9 +79,9 @@ test("ingestor() calculates Stats of a source of numbers by being fed the values
     expect(numberStats.mean).toBe(4.5);
 });
 
-test("We can abuse observe() without a performance hit", () => {
+test("We can abuse Observe() without a performance hit", () => {
     const start = Date.now();
-    const stats = observe(Math.random, 100000);
+    const stats = Observe(Math.random, 100000);
     const end = Date.now();
 
     expect(stats.min).toBeCloseTo(0);
@@ -90,17 +90,16 @@ test("We can abuse observe() without a performance hit", () => {
     expect(stats.variance).toBeCloseTo(1 / 12);
 
     const executionTime = (end - start) / 1000;
-    // console.log(`execution time: ${executionTime}s`);
     expect(executionTime).toBeGreaterThan(0);
     expect(executionTime).toBeLessThan(0.1);
 });
 
-test("validate() returns sensible results", () => {
+test("Validate() returns sensible results", () => {
     const zeros = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const ones = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
-    // Anonymous lambda serves array. Helper returns observe() applied to that.
-    const helper = (values: Array<number>): Stats => observe(
+    // Anonymous lambda serves array. Helper returns Observe() applied to that.
+    const helper = (values: Array<number>): Stats => Observe(
         (() => {
             let i = 0;
             return () => values[i++];
@@ -109,32 +108,32 @@ test("validate() returns sensible results", () => {
     );
 
     const zeroStats = helper(zeros);
-    expect(validate(zeroStats, { tolerance: 0 })).toBe(true);
-    expect(validate(zeroStats, { tolerance: 0, min: 0 })).toBe(true);
-    expect(validate(zeroStats, { tolerance: 0, min: 1 })).toBe(false);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: 0 })).toBe(true);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: -1 })).toBe(false);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0 })).toBe(true);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0.5 })).toBe(false);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0, variance: 0 })).toBe(true);
-    expect(validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0, variance: 10 })).toBe(false);
+    expect(Validate(zeroStats, { tolerance: 0 })).toBe(true);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0 })).toBe(true);
+    expect(Validate(zeroStats, { tolerance: 0, min: 1 })).toBe(false);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: 0 })).toBe(true);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: -1 })).toBe(false);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0 })).toBe(true);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0.5 })).toBe(false);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0, variance: 0 })).toBe(true);
+    expect(Validate(zeroStats, { tolerance: 0, min: 0, max: 0, mean: 0, variance: 10 })).toBe(false);
 
     const oneStats = helper(ones);
-    expect(validate(oneStats, { tolerance: 0 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0, min: 1 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0, min: 0 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0.1, min: 0.95 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0.1, min: 0.85 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: 1 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: -3 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1.06 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1.16 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 4.5 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 0.91 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1.11 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1, variance: 0 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1, variance: 10 })).toBe(false);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1, variance: 0.03 })).toBe(true);
-    expect(validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1, variance: 0.13 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0, min: 1 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0, min: 0 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 0.95 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 0.85 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: 1 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: -3 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1.06 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1.16 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 4.5 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 0.91 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1.11 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1, variance: 0 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0, min: 1, max: 1, mean: 1, variance: 10 })).toBe(false);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1, variance: 0.03 })).toBe(true);
+    expect(Validate(oneStats, { tolerance: 0.1, min: 1, max: 1, mean: 1, variance: 0.13 })).toBe(false);
 });

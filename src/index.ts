@@ -6,7 +6,7 @@ export interface Stats {
     max: number;
 }
 
-/** Settings for validate(). */
+/** Optional expected values to check in Validate(), plus accepted absolute tolerance. */
 export interface Validation {
     tolerance: number;
     mean?: number;
@@ -15,16 +15,16 @@ export interface Validation {
     max?: number;
 }
 
-/** Returns a standard nonsensical Stats object to be used as a null value. */
-export function nullStats(): Stats {
-    return { min: Number.MAX_VALUE, max: -Number.MAX_VALUE, mean: 0, variance: -1 };
+/** Returns a standard Stats object to be used as a null value. */
+export function NullStats(): Stats {
+    return { min: Number.NaN, max: Number.NaN, mean: Number.NaN, variance: Number.NaN };
 }
 
 /** Calculate min, max, mean, variance of a sequence of numbers given by successive calls to generator().
  *
  * Uses Welford's algorithm to calculate the mean and variance in a single pass.
  */
-export function observe(generator: () => number, sampleSize: number): Stats {
+export function Observe(generator: () => number, sampleSize: number): Stats {
     let mean = 0; // Rolling mean.
     let squareErrors = 0; // Sum of square errors with respect to the current mean.
     let min = Number.MAX_VALUE;
@@ -55,8 +55,7 @@ export type SampleIngestor = (sample: number) => Stats;
  *
  * Uses Welford's algorithm to calculate the mean and variance in a single pass.
  */
-// See observe() above for details.
-export function getIngestor(): SampleIngestor {
+export function GetIngestor(): SampleIngestor {
     let mean = 0;
     let squareErrors = 0;
     let min = Number.MAX_VALUE;
@@ -81,8 +80,8 @@ export function getIngestor(): SampleIngestor {
     }
 }
 
-/** Pass any number of statistics attributes to be checked in a Stats object. */
-export function validate(observed: Stats, expected: Validation): boolean {
+/** Validates the values in 'observed' against the parameters in 'expected'. */
+export function Validate(observed: Stats, expected: Validation): boolean {
     const helper = (expected: number | undefined, observed: number, tolerance: number): boolean => {
         return expected == undefined || Math.abs(observed - expected) <= tolerance;
     }
