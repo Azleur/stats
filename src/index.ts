@@ -20,32 +20,6 @@ export function NullStats(): Stats {
     return { min: Number.NaN, max: Number.NaN, mean: Number.NaN, variance: Number.NaN };
 }
 
-/** Calculate min, max, mean, variance of a sequence of numbers given by successive calls to generator().
- *
- * Uses Welford's algorithm to calculate the mean and variance in a single pass.
- */
-export function Observe(generator: () => number, sampleSize: number): Stats {
-    let mean = 0; // Rolling mean.
-    let squareErrors = 0; // Sum of square errors with respect to the current mean.
-    let min = Number.MAX_VALUE;
-    let max = -Number.MAX_VALUE;
-    for (let i = 0; i < sampleSize; i++) {
-        const x = generator();
-        if (x < min) min = x;
-        if (x > max) max = x;
-        const errorPre = x - mean; // Sample error with old mean.
-        mean += errorPre / (i + 1); // Update mean.
-        const errorPost = x - mean; // Sample error with new mean.
-        squareErrors += errorPre * errorPost; // Welford's party trick.
-    }
-    return {
-        mean: mean,
-        variance: squareErrors / sampleSize,
-        min: min,
-        max: max,
-    };
-}
-
 export type SampleIngestor = (sample: number) => Stats;
 
 /** Progressively calculate min, max, mean, variance of a sample.
@@ -78,6 +52,20 @@ export function GetIngestor(): SampleIngestor {
             max: max,
         };
     }
+}
+
+/** Calculate min, max, mean, variance of a sequence of numbers given by successive calls to generator().
+ *
+ * Uses Welford's algorithm to calculate the mean and variance in a single pass.
+ */
+export function Observe(generator: () => number, sampleSize: number): Stats {
+    const ingestor = GetIngestor();
+    let stats = NullStats();
+    for (let i = 0; i < sampleSize; i++) {
+        const sample = generator();
+        stats = ingestor(sample);
+    }
+    return stats;
 }
 
 /** Validates the values in 'observed' against the parameters in 'expected'. */
