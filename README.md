@@ -45,3 +45,26 @@ for(datum of someData) {
 }
 const good = Validate(stats, {...});
 ```
+
+## Covariance
+
+All the single-variable functions are replicated in a two-variable version that provides covariance calculation and validation. They have the same names, with the `Covariance` prefix:
+
+```typescript
+const ingestor = GetCovarianceIngestor();
+const firstSample = [...];
+const secondSample = [...];
+
+let stats = NullCovarianceStats();
+for(let i = 0; i < N; i++) {
+    stats = ingestor(firstSample[i], secondSample[i]);
+}
+
+/* stats = {
+    x: { min: ... } // Stats for firstSample.
+    y: { min: ... } // Stats for secondSample.
+    covariance: 23.5 // (e.g.)
+} */
+
+const good = CovarianceValidate(stats, {...});
+```
